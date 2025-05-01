@@ -46,6 +46,7 @@ void SendMouseClick(HWND, int, int);
 int main( int argc, char **argv ) {
 
     FILE *inFile;
+    FILE *outFile;
     BmpHeader header;
     BmpImageInfo info;
     Rgb *palette;
@@ -53,7 +54,7 @@ int main( int argc, char **argv ) {
     LARGE_INTEGER frequency, start, end;
     QueryPerformanceFrequency(&frequency);
     QueryPerformanceCounter(&start);
-    FILE *outFile;
+
 
 
 
@@ -84,13 +85,12 @@ int main( int argc, char **argv ) {
           height = rect.bottom - rect.top;
         }
         int found = 0;
-
-   //     system("capImg.exe");
-
+        sleep(3);
+        system("capImg.exe");
             //    printf( "Opening file %s for reading.\n", "screenshot0.bmp" );
         inFile = fopen( "screenshot0.bmp", "rb" );
         if( !inFile ) {
-            printf( "Error opening file here %s.\n", argv[1] );
+            printf( "Error opening file %s.\n", argv[1] );
             return -1;
         }
 
@@ -115,29 +115,33 @@ int main( int argc, char **argv ) {
                 return -1; // error
             }
         }
-        outFile = fopen("rgbVals.txt", "w");
-        fprintf(outFile, "%d, %d\n", height, width);
+
+        outFile = fopen("rgbVals.txt", "w"); //for debugging
+        fprintf(outFile, "%d, %d\n", -(info.height), info.width);
         int rowBytes = 0;
         int padding = 0;
-        for( j=0; j<height; j++ ) { //may have to change once screenshots are figured out
+        for( j=0; j<-(info.height); j++ ) { //may have to change once screenshots are figured out
             //printf( "------ Row %d\n", j+1 );
-            rowBytes = width * sizeof(Rgb);
-            padding = (4-(rowBytes%4))%4;
             read = 0;
+            rowBytes = info.width * sizeof(Rgb); // padding so screenshots don't come out slanted
+            padding = (4-(rowBytes%4))%4;
             fseek(inFile, padding, SEEK_CUR);
-            for( i=0; i<width; i++ ) { //may have to change once screenshots are figured out
+            for( i=0; i<info.width; i++ ) { //may have to change once screenshots are figured out
                 if( fread(pixel, 1, sizeof(Rgb), inFile) != sizeof(Rgb) ) {
                     printf( "Error reading pixel!\n" );
                 }
-                fprintf(outFile, "%u,%u,%u\n", pixel->red, pixel->green, pixel->blue);
                 read += sizeof(Rgb);
-  //              if(i == 277+8 && j == 104+31){  //j is x, i is y i=267-8;
-                                                //j=252-31;
-      //              printf( "Pixel %d %d: %3d %3d %3d\n", i, j, pixel->red, pixel->green, pixel->blue );
-        //        }
+                //if(j != 241 && i != 253){
+                    fprintf(outFile, "%u,%u,%u\n", pixel->red, pixel->green, pixel->blue);  //for debugging
+                //} else {
+                //    fprintf(outFile, "%u,%u,%u\n", 255, 255, 255);  //for debugging
+                //}
+                if(j == 243 && i == 355){  //j is x, i is y
+                   printf( "Pixel %d %d: %3d %3d %3d\n", i, j, pixel->red, pixel->green, pixel->blue );
+                } //for finding color of given pixel
 
                 //find pixel of a certain color and click on it.
-           /*     if(pixel->red == 54 && pixel->green == 12 && pixel->blue == 58){
+                if(pixel->red == 104 && pixel->green == 106 && pixel->blue == 215){
                     if(found == 0){
                         found = 1;
                         printf( "Pixel x: %d: y: %d\n", i, j);
@@ -148,15 +152,15 @@ int main( int argc, char **argv ) {
                         ScreenToClient(hWnd, &p); 
                         printf("x: %d y: %d\n", p.x, p.y);
                         sleep(1);
-                        if(p.x == i && p.y == j){
+                        if(p.x == i && p.y == j && pixel->red == 104 && pixel->green == 106 && pixel->blue == 215){
                             //p.x and p.y are now relative to hwnd's client area
                             printf("x: %d y: %d", p.x, p.y);
                             SendMouseClick(hWnd, i, j);
-                            sleep(5);
+                            sleep(10);
                         }
                     }
-                }*/
-            }  
+                }
+            }
             /*
              if( read % 4 != 0 ) {
                 read = 4 - (read%4);
@@ -173,7 +177,6 @@ int main( int argc, char **argv ) {
 
     printf( "Done.\n" );
     fclose(inFile);
-    fclose(outFile);
    // fclose(outFile);
 
     printf( "\nBMP-Info:\n" );
@@ -189,13 +192,40 @@ void moveMouseRelative(HWND hwnd, int x, int y) {
   // Get the window's position on the screen
   RECT windowRect;
   GetWindowRect(hwnd, &windowRect);
-
+  POINT p;
+  printf("here\n");
   // Calculate the new mouse position relative to the window
-  int newX = windowRect.left + x + 8; //add 8 because window bar is probably included
-  int newY = windowRect.top + y + 31; //add 32 because window bar is probably included
+  int newX = windowRect.left + x; //add 8 because window bar is probably included
+  int newY = windowRect.top + y; //add 32 because window bar is probably included
+  printf("here\n");
+   GetCursorPos(&p);
+   ScreenToClient(hwnd, &p); 
 //  std::cout << newX << " " << newY << std::flush;
   // Move the mouse cursor
-  SetCursorPos(newX, newY);
+    printf("Mouse: %d %d\n", p.x, p.y);
+    SetCursorPos(newX, newY);
+/*    int i = 0;
+    int j = 0;
+    i = p.x;
+    j = p.y;
+    while(i != newX && j != newY){
+        if(i > newX){
+            i--;
+            SetCursorPos(i, j);
+        } 
+        if(j > newY){
+            j--;
+            SetCursorPos(i, j);
+        } 
+        if(i < newX){
+            i++;
+            SetCursorPos(i, j);
+        } 
+        if(j < newY){
+            j++;
+            SetCursorPos(i, j);
+        } 
+    }   */
 }
 
 void SendMouseClick(HWND hWnd, int x, int y) {
