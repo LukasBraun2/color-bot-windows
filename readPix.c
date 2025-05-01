@@ -193,39 +193,13 @@ void moveMouseRelative(HWND hwnd, int x, int y) {
   RECT windowRect;
   GetWindowRect(hwnd, &windowRect);
   POINT p;
-  printf("here\n");
   // Calculate the new mouse position relative to the window
   int newX = windowRect.left + x; //add 8 because window bar is probably included
   int newY = windowRect.top + y; //add 32 because window bar is probably included
-  printf("here\n");
-   GetCursorPos(&p);
-   ScreenToClient(hwnd, &p); 
 //  std::cout << newX << " " << newY << std::flush;
   // Move the mouse cursor
-    printf("Mouse: %d %d\n", p.x, p.y);
     SetCursorPos(newX, newY);
-/*    int i = 0;
-    int j = 0;
-    i = p.x;
-    j = p.y;
-    while(i != newX && j != newY){
-        if(i > newX){
-            i--;
-            SetCursorPos(i, j);
-        } 
-        if(j > newY){
-            j--;
-            SetCursorPos(i, j);
-        } 
-        if(i < newX){
-            i++;
-            SetCursorPos(i, j);
-        } 
-        if(j < newY){
-            j++;
-            SetCursorPos(i, j);
-        } 
-    }   */
+
 }
 
 void SendMouseClick(HWND hWnd, int x, int y) {
