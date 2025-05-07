@@ -29,8 +29,8 @@ void CaptureScreenToBitmap(const char* filename) {    // Get the screen dimensio
     int width, height = 0;
     if(GetWindowRect(hwnd, &rect))
     {
-      width = rect.right - rect.left;
-      height = rect.bottom - rect.top;
+      width = rect.right - rect.left-293;
+      height = rect.bottom - rect.top-173;
     }
     //screenWidth -= 1;
     //screenHeight -= 1;
